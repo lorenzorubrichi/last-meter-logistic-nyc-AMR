@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Last-Meter Joined CSV Exporter</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d7dde5;
+      --accent: #1f7a68;
+      --accent-dark: #15594c;
+      --soft: #e9f4f1;
+      --warn-bg: #fff5df;
+      --warn: #61430d;
+      --bad: #a83232;
+      --shadow: 0 10px 28px rgba(23, 32, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 28px max(24px, 6vw);
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    header p {
+      max-width: 920px;
+      margin: 0;
+      color: #d8dee7;
+    }
+
+    main {
+      width: min(1280px, calc(100% - 32px));
+      margin: 24px auto 48px;
+      display: block;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 18px 0 10px;
+      font-size: 0.95rem;
+      letter-spacing: 0;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 6px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: #344054;
+    }
+
+    input,
+    select,
+    button {
+      font: inherit;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="file"],
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      border-color: var(--accent);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      color: #98a2b3;
+      background: #f2f4f7;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .primary:hover:not(:disabled) {
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .button-row button {
+      flex: 1 1 130px;
+    }
+
+    .note {
+      margin: 12px 0 0;
+      padding: 10px 12px;
+      border-left: 4px solid var(--accent);
+      background: var(--soft);
+      color: #25433d;
+      font-size: 0.9rem;
+    }
+
+    .warning {
+      border-left-color: #c47c00;
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .status {
+      min-height: 40px;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .status.error {
+      border-color: #f0b7b7;
+      background: #fff2f2;
+      color: var(--bad);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfd;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.25rem;
+      line-height: 1.1;
+      color: var(--accent-dark);
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .join-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    .settings-row {
+      display: grid;
+      grid-template-columns: minmax(220px, 340px) minmax(0, 1fr);
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+
+    .columns-toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .columns-list {
+      height: 380px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .column-item {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 8px;
+      align-items: start;
+      padding: 9px 10px;
+      border-bottom: 1px solid #edf0f4;
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+
+    .column-item:last-child {
+      border-bottom: 0;
+    }
+
+    .column-item input {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+    }
+
+    .field-source {
+      display: inline-block;
+      margin-right: 6px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: #edf0f4;
+      color: #475467;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .field-name {
+      border-bottom: 1px dotted #98a2b3;
+      cursor: help;
+    }
+
+    .filters {
+      display: grid;
+      gap: 10px;
+    }
+
+    .filter-row {
+      display: grid;
+      grid-template-columns: minmax(190px, 1.3fr) minmax(120px, 0.7fr) minmax(120px, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .output-name {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-top: 16px;
+      align-items: end;
+    }
+
+    .output-name label {
+      margin-top: 0;
+    }
+
+    @media (max-width: 920px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .stats,
+      .join-grid,
+      .settings-row,
+      .columns-toolbar,
+      .filter-row,
+      .output-name {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Last-Meter Joined CSV Exporter</h1>
+    <p>Load the baseline and Street View AI tables, select fields from both, filter them, and download a joined CSV without displaying row-level data on the page.</p>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="export-title">
+      <h2 id="export-title">Build Joined Export</h2>
+
+      <div class="settings-row">
+        <div>
+          <label for="joinMode">Rows to export</label>
+          <select id="joinMode">
+            <option value="ai_matched">AI subset with matching baseline fields</option>
+            <option value="baseline_all">All baseline rows, with AI fields when available</option>
+            <option value="inner">Rows present in both tables</option>
+            <option value="outer">All rows from both tables</option>
+          </select>
+        </div>
+        <div id="status" class="status">Loading tables from data/processed...</div>
+      </div>
+
+      <div class="stats" aria-live="polite">
+        <div class="stat">
+          <strong id="baselineRows">0</strong>
+          <span>baseline rows</span>
+        </div>
+        <div class="stat">
+          <strong id="aiRows">0</strong>
+          <span>AI rows</span>
+        </div>
+        <div class="stat">
+          <strong id="fieldCount">0</strong>
+          <span>available fields</span>
+        </div>
+        <div class="stat">
+          <strong id="matchCount">0</strong>
+          <span>rows matching filters</span>
+        </div>
+      </div>
+
+      <h3>Fields</h3>
+      <div class="columns-toolbar">
+        <input id="fieldSearch" type="text" placeholder="Search fields">
+        <button type="button" id="selectAll">Select all</button>
+        <button type="button" id="clearSelection">Clear</button>
+      </div>
+      <div id="fieldsList" class="columns-list" aria-label="Fields"></div>
+
+      <h3>Filters</h3>
+      <div id="filters" class="filters"></div>
+      <div class="button-row">
+        <button type="button" id="addFilter">Add filter</button>
+        <button type="button" id="clearFilters">Clear filters</button>
+        <button type="button" id="applyFilters">Update count</button>
+      </div>
+
+      <div class="output-name">
+        <div>
+          <label for="outputName">Output filename</label>
+          <input id="outputName" type="text" value="last_meter_joined_export.csv">
+        </div>
+        <button type="button" id="downloadCsv" class="primary" disabled>Download CSV</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const REPOSITORY_FILES = {
+      baseline: "data/processed/complete_last_meter_dataset_public.csv",
+      ai: "data/processed/last_meter_ai_subset_public.csv",
+      baselineDictionary: "data/processed/complete_last_meter_dataset_dictionary.csv",
+      aiDictionary: "data/processed/last_meter_ai_subset_dictionary.csv"
+    };
+
+    const state = {
+      baseline: { name: "baseline", headers: [], rows: [], dictionary: new Map(), keyIndex: -1, index: new Map() },
+      ai: { name: "ai", headers: [], rows: [], dictionary: new Map(), keyIndex: -1, index: new Map() },
+      fields: [],
+      selected: new Set(),
+      rowPairs: [],
+      filteredPairs: []
+    };
+
+    const el = {
+      joinMode: document.getElementById("joinMode"),
+      status: document.getElementById("status"),
+      baselineRows: document.getElementById("baselineRows"),
+      aiRows: document.getElementById("aiRows"),
+      fieldCount: document.getElementById("fieldCount"),
+      matchCount: document.getElementById("matchCount"),
+      fieldSearch: document.getElementById("fieldSearch"),
+      fieldsList: document.getElementById("fieldsList"),
+      selectAll: document.getElementById("selectAll"),
+      clearSelection: document.getElementById("clearSelection"),
+      filters: document.getElementById("filters"),
+      addFilter: document.getElementById("addFilter"),
+      clearFilters: document.getElementById("clearFilters"),
+      applyFilters: document.getElementById("applyFilters"),
+      outputName: document.getElementById("outputName"),
+      downloadCsv: document.getElementById("downloadCsv")
+    };
+
+    function setStatus(message, isError = false) {
+      el.status.textContent = message;
+      el.status.classList.toggle("error", isError);
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let field = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && next === '"') {
+            field += '"';
+            i += 1;
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            field += char;
+          }
+          continue;
+        }
+
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === ",") {
+          row.push(field);
+          field = "";
+        } else if (char === "\n") {
+          row.push(field);
+          rows.push(row);
+          row = [];
+          field = "";
+        } else if (char !== "\r") {
+          field += char;
+        }
+      }
+
+      if (field.length > 0 || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+      }
+
+      while (rows.length && rows[rows.length - 1].every((value) => value === "")) {
+        rows.pop();
+      }
+
+      return rows;
+    }
+
+    function csvEscape(value) {
+      const text = value == null ? "" : String(value);
+      if (/[",\r\n]/.test(text)) {
+        return '"' + text.replace(/"/g, '""') + '"';
+      }
+      return text;
+    }
+
+    function normalizeTable(parsed, name) {
+      if (!parsed.length) {
+        throw new Error(`${name} CSV is empty.`);
+      }
+      const headers = parsed[0].map((header) => header.trim());
+      const rows = parsed.slice(1)
+        .filter((row) => row.some((value) => value !== ""))
+        .map((row) => headers.map((_, index) => row[index] ?? ""));
+      return { name, headers, rows, dictionary: new Map(), keyIndex: -1, index: new Map() };
+    }
+
+    function parseDictionary(parsed) {
+      const dictionary = new Map();
+      if (!parsed.length) {
+        return dictionary;
+      }
+      const headers = parsed[0].map((header) => header.trim().toLowerCase());
+      const columnIndex = headers.indexOf("column");
+      const descriptionIndex = headers.indexOf("description");
+      if (columnIndex < 0 || descriptionIndex < 0) {
+        return dictionary;
+      }
+      parsed.slice(1).forEach((row) => {
+        const column = (row[columnIndex] || "").trim();
+        const description = (row[descriptionIndex] || "").trim();
+        if (column && description) {
+          dictionary.set(column, description);
+        }
+      });
+      return dictionary;
+    }
+
+    async function fetchText(path) {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Could not load ${path}. HTTP ${response.status}`);
+      }
+      return response.text();
+    }
+
+    function rebuildIndexes() {
+      const key = "bin";
+      ["baseline", "ai"].forEach((source) => {
+        const table = state[source];
+        table.keyIndex = table.headers.indexOf(key);
+        table.index = new Map();
+        if (table.keyIndex < 0) {
+          throw new Error(`${source} table does not contain join key '${key}'.`);
+        }
+        table.rows.forEach((row, index) => {
+          const value = row[table.keyIndex];
+          if (value !== "" && !table.index.has(value)) {
+            table.index.set(value, index);
+          }
+        });
+      });
+    }
+
+    function buildFields() {
+      const fields = [];
+      ["baseline", "ai"].forEach((source) => {
+        const table = state[source];
+        table.headers.forEach((column, index) => {
+          const id = `${source}::${column}`;
+          fields.push({
+            id,
+            source,
+            column,
+            index,
+            outputName: `${source}__${column}`,
+            description: table.dictionary.get(column) || ""
+          });
+        });
+      });
+      state.fields = fields;
+      state.selected = new Set(fields.map((field) => field.id));
+    }
+
+    function getFieldValue(pair, field) {
+      const rowIndex = pair[field.source];
+      if (rowIndex == null || rowIndex < 0) {
+        return "";
+      }
+      return state[field.source].rows[rowIndex][field.index] ?? "";
+    }
+
+    function buildPairs() {
+      rebuildIndexes();
+      const pairs = [];
+      const mode = el.joinMode.value;
+
+      if (mode === "ai_matched" || mode === "inner") {
+        state.ai.rows.forEach((row, aiIndex) => {
+          const key = row[state.ai.keyIndex];
+          const baselineIndex = state.baseline.index.get(key);
+          if (baselineIndex != null) {
+            pairs.push({ baseline: baselineIndex, ai: aiIndex, key });
+          }
+        });
+      } else if (mode === "baseline_all") {
+        state.baseline.rows.forEach((row, baselineIndex) => {
+          const key = row[state.baseline.keyIndex];
+          const aiIndex = state.ai.index.get(key);
+          pairs.push({ baseline: baselineIndex, ai: aiIndex ?? -1, key });
+        });
+      } else if (mode === "outer") {
+        const usedAi = new Set();
+        state.baseline.rows.forEach((row, baselineIndex) => {
+          const key = row[state.baseline.keyIndex];
+          const aiIndex = state.ai.index.get(key);
+          if (aiIndex != null) {
+            usedAi.add(aiIndex);
+          }
+          pairs.push({ baseline: baselineIndex, ai: aiIndex ?? -1, key });
+        });
+        state.ai.rows.forEach((row, aiIndex) => {
+          if (!usedAi.has(aiIndex)) {
+            pairs.push({ baseline: -1, ai: aiIndex, key: row[state.ai.keyIndex] });
+          }
+        });
+      }
+
+      state.rowPairs = pairs;
+      state.filteredPairs = pairs;
+    }
+
+    function resetAfterLoad() {
+      buildFields();
+      buildPairs();
+      renderFields();
+      resetFilters();
+      updateStats();
+      el.downloadCsv.disabled = state.rowPairs.length === 0 || state.selected.size === 0;
+      setStatus(`Loaded ${state.baseline.rows.length.toLocaleString()} baseline rows and ${state.ai.rows.length.toLocaleString()} AI rows. Joined rows: ${state.rowPairs.length.toLocaleString()}.`);
+    }
+
+    async function loadDataTables() {
+      setStatus("Loading repository tables...");
+      const [baselineText, aiText, baselineDictionaryText, aiDictionaryText] = await Promise.all([
+        fetchText(REPOSITORY_FILES.baseline),
+        fetchText(REPOSITORY_FILES.ai),
+        fetchText(REPOSITORY_FILES.baselineDictionary),
+        fetchText(REPOSITORY_FILES.aiDictionary)
+      ]);
+      state.baseline = normalizeTable(parseCsv(baselineText), "baseline");
+      state.ai = normalizeTable(parseCsv(aiText), "ai");
+      state.baseline.dictionary = parseDictionary(parseCsv(baselineDictionaryText));
+      state.ai.dictionary = parseDictionary(parseCsv(aiDictionaryText));
+      resetAfterLoad();
+    }
+
+    function renderFields() {
+      const query = el.fieldSearch.value.trim().toLowerCase();
+      el.fieldsList.innerHTML = "";
+      state.fields
+        .filter((field) => {
+          const haystack = `${field.source} ${field.column} ${field.description}`.toLowerCase();
+          return haystack.includes(query);
+        })
+        .forEach((field) => {
+          const id = "field-" + btoa(unescape(encodeURIComponent(field.id))).replace(/=+$/g, "");
+          const wrapper = document.createElement("label");
+          wrapper.className = "column-item";
+          wrapper.setAttribute("for", id);
+          wrapper.title = field.description || "No description available.";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.id = id;
+          checkbox.checked = state.selected.has(field.id);
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+              state.selected.add(field.id);
+            } else {
+              state.selected.delete(field.id);
+            }
+            updateStats();
+          });
+
+          const text = document.createElement("span");
+          const source = document.createElement("span");
+          source.className = "field-source";
+          source.textContent = field.source;
+          const name = document.createElement("span");
+          name.className = "field-name";
+          name.textContent = field.column;
+          name.title = field.description || "No description available.";
+          text.append(source, name);
+          wrapper.append(checkbox, text);
+          el.fieldsList.appendChild(wrapper);
+        });
+    }
+
+    function makeFieldSelect(selected = "") {
+      const select = document.createElement("select");
+      state.fields.forEach((field) => {
+        const option = document.createElement("option");
+        option.value = field.id;
+        option.textContent = `${field.source}: ${field.column}`;
+        option.title = field.description || "";
+        option.selected = field.id === selected;
+        select.appendChild(option);
+      });
+      return select;
+    }
+
+    function addFilterRow(filter = {}) {
+      const row = document.createElement("div");
+      row.className = "filter-row";
+      const field = makeFieldSelect(filter.field || (state.fields[0] && state.fields[0].id) || "");
+      const op = document.createElement("select");
+      [
+        ["contains", "contains"],
+        ["equals", "equals"],
+        ["not_equals", "not equals"],
+        ["not_empty", "is not empty"],
+        ["empty", "is empty"],
+        ["gt", ">"],
+        ["gte", ">="],
+        ["lt", "<"],
+        ["lte", "<="]
+      ].forEach(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        option.selected = value === filter.op;
+        op.appendChild(option);
+      });
+      const value = document.createElement("input");
+      value.type = "text";
+      value.placeholder = "Filter value";
+      value.value = filter.value || "";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", () => {
+        row.remove();
+        applyFilters();
+      });
+      row.append(field, op, value, remove);
+      el.filters.appendChild(row);
+    }
+
+    function resetFilters() {
+      el.filters.innerHTML = "";
+      if (state.fields.length) {
+        addFilterRow();
+      }
+    }
+
+    function getFilters() {
+      return Array.from(el.filters.querySelectorAll(".filter-row")).map((row) => {
+        const controls = row.querySelectorAll("select, input");
+        return {
+          fieldId: controls[0].value,
+          op: controls[1].value,
+          value: controls[2].value
+        };
+      }).filter((filter) => filter.fieldId && (filter.value !== "" || filter.op === "empty" || filter.op === "not_empty"));
+    }
+
+    function passesFilter(pair, filter) {
+      const field = state.fields.find((candidate) => candidate.id === filter.fieldId);
+      if (!field) {
+        return true;
+      }
+      const value = String(getFieldValue(pair, field) ?? "");
+      const target = String(filter.value ?? "");
+      const valueLower = value.toLowerCase();
+      const targetLower = target.toLowerCase();
+      const valueNumber = Number(value.replace(",", "."));
+      const targetNumber = Number(target.replace(",", "."));
+
+      switch (filter.op) {
+        case "contains":
+          return valueLower.includes(targetLower);
+        case "equals":
+          return valueLower === targetLower;
+        case "not_equals":
+          return valueLower !== targetLower;
+        case "empty":
+          return value.trim() === "";
+        case "not_empty":
+          return value.trim() !== "";
+        case "gt":
+          return Number.isFinite(valueNumber) && Number.isFinite(targetNumber) && valueNumber > targetNumber;
+        case "gte":
+          return Number.isFinite(valueNumber) && Number.isFinite(targetNumber) && valueNumber >= targetNumber;
+        case "lt":
+          return Number.isFinite(valueNumber) && Number.isFinite(targetNumber) && valueNumber < targetNumber;
+        case "lte":
+          return Number.isFinite(valueNumber) && Number.isFinite(targetNumber) && valueNumber <= targetNumber;
+        default:
+          return true;
+      }
+    }
+
+    function applyFilters() {
+      try {
+        buildPairs();
+      } catch (error) {
+        setStatus(error.message, true);
+        return;
+      }
+      const filters = getFilters();
+      state.filteredPairs = state.rowPairs.filter((pair) => filters.every((filter) => passesFilter(pair, filter)));
+      updateStats();
+      setStatus(`Filters updated. ${state.filteredPairs.length.toLocaleString()} joined rows match.`);
+    }
+
+    function updateStats() {
+      el.baselineRows.textContent = state.baseline.rows.length.toLocaleString();
+      el.aiRows.textContent = state.ai.rows.length.toLocaleString();
+      el.fieldCount.textContent = state.fields.length.toLocaleString();
+      el.matchCount.textContent = state.filteredPairs.length.toLocaleString();
+      el.downloadCsv.disabled = state.rowPairs.length === 0 || state.selected.size === 0;
+    }
+
+    function downloadCsv() {
+      applyFilters();
+      const selectedFields = state.fields.filter((field) => state.selected.has(field.id));
+      if (!selectedFields.length) {
+        setStatus("Select at least one field before downloading.", true);
+        return;
+      }
+      const lines = [selectedFields.map((field) => csvEscape(field.outputName)).join(",")];
+      state.filteredPairs.forEach((pair) => {
+        lines.push(selectedFields.map((field) => csvEscape(getFieldValue(pair, field))).join(","));
+      });
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = el.outputName.value.trim() || "last_meter_joined_export.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus(`Downloaded ${state.filteredPairs.length.toLocaleString()} joined rows with ${selectedFields.length} fields.`);
+    }
+
+    el.joinMode.addEventListener("change", applyFilters);
+    el.fieldSearch.addEventListener("input", renderFields);
+    el.selectAll.addEventListener("click", () => {
+      state.selected = new Set(state.fields.map((field) => field.id));
+      renderFields();
+      updateStats();
+    });
+    el.clearSelection.addEventListener("click", () => {
+      state.selected.clear();
+      renderFields();
+      updateStats();
+    });
+    el.addFilter.addEventListener("click", () => {
+      if (state.fields.length) {
+        addFilterRow();
+      }
+    });
+    el.clearFilters.addEventListener("click", () => {
+      resetFilters();
+      applyFilters();
+    });
+    el.applyFilters.addEventListener("click", applyFilters);
+    el.downloadCsv.addEventListener("click", downloadCsv);
+
+    loadDataTables().catch((error) => {
+      setStatus(`${error.message} Serve this repository with GitHub Pages or another static web server so the browser can read files from data/processed.`, true);
+    });
+  </script>
+</body>
+</html>

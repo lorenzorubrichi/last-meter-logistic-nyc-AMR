@@ -1,4 +1,4 @@
-# NYC Last-Meter Delivery: Geospatial, Simulation, and Street View AI DATASET Pipeline
+# NYC Last-Meter Delivery: Geospatial, Simulation, and Street View AI Pipeline
 
 This repository contains a research pipeline for estimating last-meter delivery
 times in New York City buildings. It combines geospatial feature engineering,
