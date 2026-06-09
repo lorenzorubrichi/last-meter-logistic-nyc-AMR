@@ -27,22 +27,21 @@ constraints. The code is designed to scale incrementally to more buildings.
 ## 2 Repository Structure
 
 ```text
-src/last_meter_nyc/
-
-docs/
-  methodology.md
-  parking_availability.md
-  streetview_scaling.md
-  github_publication_checklist.md
-  raw_data_sources.md
-
-data/
-  raw/             small schema-compatible sample extracts
-  schema/          selected publication fields and descriptions
-  processed/       publication-ready processed data, if included
-
-models/            trained model bundles, if included
-notebooks/         optional analysis notebooks
+last-meter-nyc-public/
+├── data/
+│   ├── raw/          Small sample extracts of the original input datasets
+│   ├── processed/    Publication-ready CSV datasets and data dictionaries
+│   └── schema/       Selected field lists used for public exports
+├── docs/             Methodology notes, data sources, and project documentation
+├── src/              Python source code for the pipeline
+├── csv_filter_exporter.html
+│                    Browser-based tool to join/filter fields and export CSVs
+├── README.md         Project overview, setup, and usage instructions
+├── requirements.txt  Python dependencies
+├── CITATION.cff      Citation metadata
+├── .gitignore        Files and folders excluded from Git
+├── LICENSE_CODE_MIT.txt
+└── LICENSE_DATA_CC_BY_4_0_NOTE.txt
 ```
 
 Large raw datasets, API keys, downloaded images, and cache files should not be
