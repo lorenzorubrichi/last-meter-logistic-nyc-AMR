@@ -56,11 +56,6 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-On macOS/Linux, use:
-
-```bash
-source .venv/bin/activate
-```
 
 ## 4 Environment Variables
 
@@ -93,46 +88,8 @@ python -m last_meter_nyc.streetview_ai.merge_ai_visual_features
 python -m last_meter_nyc.modeling.train_ai_informed_variants
 ```
 
-All public paths are repository-relative. The included raw files are samples;
-for full reproduction, replace them with the complete files described in
-`docs/raw_data_sources.md`.
 
-## 6 Public Dataset Export
-
-Internal feature names are preserved for backward compatibility, but public
-exports should use clearer names and the selected field lists in:
-
-```text
-data/schema/base_fields.csv
-data/schema/ai_fields.csv
-```
-
-These schema files define the final column order, the fields kept in the
-published CSVs, and the descriptions used in the data dictionaries.
-
-```bash
-python -m last_meter_nyc.data.export_public_dataset ^
-  --input data/processed/complete_last_meter_dataset_extended.csv ^
-  --output data/processed/complete_last_meter_dataset_public.csv ^
-  --dictionary-output data/processed/complete_last_meter_dataset_dictionary.csv ^
-  --schema data/schema/base_fields.csv
-
-python -m last_meter_nyc.data.export_public_dataset ^
-  --input data/processed/complete_last_meter_dataset_ai_subset.csv ^
-  --output data/processed/last_meter_ai_subset_public.csv ^
-  --dictionary-output data/processed/last_meter_ai_subset_dictionary.csv ^
-  --schema data/schema/ai_fields.csv
-```
-
-Example rename:
-
-```text
-CurbCrowdingPenalty -> curb_parking_difficulty_penalty_R
-ParkingScarcity_advantage -> parking_meter_scarcity_penalty
-a1_Floors_norm -> building_floor_count_norm_R
-```
-
-## 7 Static CSV Export Tool
+## 6 Static CSV Export Tool
 
 The repository includes `csv_filter_exporter.html`, a browser-only tool for
 creating custom CSV extracts without displaying the dataset rows on the page.
@@ -162,7 +119,7 @@ For local use, serve the repository folder with a small static web server and
 open `csv_filter_exporter.html`; this lets the browser read the CSV files from
 `data/processed/`.
 
-## 8 Citation
+## 7 Citation
 
 If this repository is used in a thesis, paper, or derivative project, cite the
 repository and the original NYC open-data sources used by the pipeline.
