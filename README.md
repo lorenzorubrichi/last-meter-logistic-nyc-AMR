@@ -5,7 +5,7 @@ times in New York City buildings. It combines geospatial feature engineering,
 Monte Carlo simulation, regression models, and an optional Street View AI branch
 for visual access barriers.
 
-##1 What This Project Does
+## 1 What This Project Does
 
 The pipeline supports two levels of analysis:
 
@@ -24,7 +24,7 @@ The pipeline supports two levels of analysis:
 The visual AI branch was run on about 7,000 buildings due to API cost
 constraints. The code is designed to scale incrementally to more buildings.
 
-##2 Repository Structure
+## 2 Repository Structure
 
 ```text
 src/last_meter_nyc/
@@ -49,7 +49,7 @@ Large raw datasets, API keys, downloaded images, and cache files should not be
 committed to GitHub. The files in `data/raw/` are small schema-compatible
 samples; replace them with complete raw files to reproduce the full dataset.
 
-##3 Installation
+## 3 Installation
 
 ```bash
 python -m venv .venv
@@ -63,7 +63,7 @@ On macOS/Linux, use:
 source .venv/bin/activate
 ```
 
-##4 Environment Variables
+## 4 Environment Variables
 
 Copy `.env.example` to `.env` and add local keys if you intend to run the
 Street View and AI extraction steps.
@@ -73,9 +73,9 @@ GOOGLE_STREETVIEW_API_KEY=...
 OPENAI_API_KEY=...
 ```
 
-##5 Main Workflows
+## 5 Main Workflows
 
-###5.1. Baseline Citywide Workflow
+### 5.1. Baseline Citywide Workflow
 
 ```bash
 python -m last_meter_nyc.data.build_geospatial_features
@@ -83,7 +83,7 @@ python -m last_meter_nyc.modeling.train_baseline_models --n-buildings 10000 --n-
 python -m last_meter_nyc.data.build_complete_dataset
 ```
 
-###5.2. Street View AI Workflow
+### 5.2. Street View AI Workflow
 
 ```bash
 python -m last_meter_nyc.streetview_ai.build_streetview_targets
@@ -98,7 +98,7 @@ All public paths are repository-relative. The included raw files are samples;
 for full reproduction, replace them with the complete files described in
 `docs/raw_data_sources.md`.
 
-##6 Public Dataset Export
+## 6 Public Dataset Export
 
 Internal feature names are preserved for backward compatibility, but public
 exports should use clearer names and the selected field lists in:
@@ -133,7 +133,7 @@ ParkingScarcity_advantage -> parking_meter_scarcity_penalty
 a1_Floors_norm -> building_floor_count_norm_R
 ```
 
-##7 Static CSV Export Tool
+## 7 Static CSV Export Tool
 
 The repository includes `csv_filter_exporter.html`, a browser-only tool for
 creating custom CSV extracts without displaying the dataset rows on the page.
@@ -163,7 +163,7 @@ For local use, serve the repository folder with a small static web server and
 open `csv_filter_exporter.html`; this lets the browser read the CSV files from
 `data/processed/`.
 
-##8 Citation
+## 8 Citation
 
 If this repository is used in a thesis, paper, or derivative project, cite the
 repository and the original NYC open-data sources used by the pipeline.
