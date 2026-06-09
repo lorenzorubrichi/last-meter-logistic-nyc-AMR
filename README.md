@@ -48,6 +48,11 @@ Large raw datasets, API keys, downloaded images, and cache files should not be
 committed to GitHub. The files in `data/raw/` are small schema-compatible
 samples; replace them with complete raw files to reproduce the full dataset.
 
+The files in `data/processed/` are sample extracts of the publication-ready
+datasets. The complete datasets can be freely downloaded from Google Drive:
+https://drive.google.com/drive/folders/1MJ0_bqZ0D3lLaHHkLrONyCbgoC-zfkTO?usp=sharing
+
+
 ## 3 Installation
 
 ```bash
